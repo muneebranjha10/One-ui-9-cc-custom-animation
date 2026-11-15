@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Ultra Motion</string>
+    <string name="xposed_description">One UI 9 Control Center opening and closing animation engine for Samsung SystemUI (SM-S911B)</string>
+</resources>

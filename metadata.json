@@ -1,0 +1,6 @@
+{
+  "name": "Ultra Motion",
+  "description": "One UI 9 Ultra Motion Control Center LSPosed animation module and companion settings app.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

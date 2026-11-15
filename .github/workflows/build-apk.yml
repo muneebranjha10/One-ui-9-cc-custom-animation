@@ -2,9 +2,7 @@ name: Build Ultra Motion LSPosed APK
 
 on:
   push:
-    branches: [ main, master ]
   pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -20,18 +18,30 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: '21'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Set up Gradle
+      - name: Accept Android SDK licenses & install API 36 / 36.1
+        shell: bash
+        run: |
+          set +o pipefail
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platform-tools" "build-tools;36.0.0" "platforms;android-36" || true
+          sdkmanager "platforms;android-36.1" || true
+
+      - name: Set up Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 9.0.0
+          gradle-version: '9.3.1'
 
-      - name: Ensure debug keystore exists for CI signing
+      - name: Ensure .env and debug.keystore exist for CI build
+        shell: bash
         run: |
+          if [ ! -f .env ] && [ -f .env.example ]; then
+            cp .env.example .env
+          fi
           if [ ! -f debug.keystore ]; then
             keytool -genkeypair -v \
               -keystore debug.keystore \
@@ -44,11 +54,8 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: Run unit & Robolectric tests
-        run: gradle :app:testDebugUnitTest --no-daemon
-
-      - name: Build Debug APK
-        run: gradle :app:assembleDebug --no-daemon
+      - name: Run unit tests & assemble Debug APK
+        run: gradle :app:testDebugUnitTest :app:assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
